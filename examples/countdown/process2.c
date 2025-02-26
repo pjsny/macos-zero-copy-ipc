@@ -23,6 +23,14 @@ int main()
         return 1;
     }
 
+    // Access the counter structure in shared memory
+    typedef struct
+    {
+        int counter;
+    } shared_counter_t;
+
+    shared_counter_t *counter_data = (shared_counter_t *)shm.addr;
+
     printf("Connected to shared memory\n");
 
     // Signal initial connection
@@ -34,8 +42,8 @@ int main()
     {
         printf("  Sending %d...\n", i);
 
-        // Write the number to shared memory
-        sprintf(shm.addr, "%d", i);
+        // Write the number directly to shared memory
+        counter_data->counter = i;
 
         // Signal that a new number is available
         sem_post(sem_done);

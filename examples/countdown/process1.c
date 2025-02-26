@@ -25,6 +25,15 @@ int main()
         return 1;
     }
 
+    // Initialize the shared memory with a counter structure
+    typedef struct
+    {
+        int counter;
+    } shared_counter_t;
+
+    shared_counter_t *counter_data = (shared_counter_t *)shm.addr;
+    counter_data->counter = -1; // Initialize to an invalid value
+
     printf("Shared memory created, waiting for writer...\n");
 
     // Wait for writer to connect
@@ -33,14 +42,13 @@ int main()
     printf("Connection established, processing numbers...\n");
 
     // Process numbers until we get a zero
-    int number = -1;
     while (1)
     {
         // Wait for the signal that a new number is available
         sem_wait(sem_done);
 
-        // Read and parse the number
-        sscanf(shm.addr, "%d", &number);
+        // Read the number directly from shared memory
+        int number = counter_data->counter;
         printf("Received number: %d\n", number);
 
         if (number == 0)
