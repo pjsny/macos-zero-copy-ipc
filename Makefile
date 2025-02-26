@@ -11,6 +11,7 @@ SIMD_INCLUDE = -I$(CURDIR)/external/math_intrinsics
 SRC_DIR = src
 EXAMPLES_DIR = examples
 BUILD_DIR = build
+TEST_DIR = tests
 
 # Shared Memory Library
 SHM_SRC = $(SRC_DIR)/shared_memory.c
@@ -27,6 +28,10 @@ SPECIAL_EXAMPLES = mmap_file simd_processing
 STD_EXAMPLE_NAMES = $(foreach ex,$(STD_EXAMPLES),$(firstword $(subst :, ,$(ex))))
 EXAMPLES = $(STD_EXAMPLE_NAMES) $(SPECIAL_EXAMPLES)
 
+# Test-related variables
+TEST_BUILD_DIR = $(BUILD_DIR)/tests
+SIMD_TESTS = vector_functions
+
 # Default target
 all: directories $(EXAMPLES)
 
@@ -34,6 +39,7 @@ all: directories $(EXAMPLES)
 directories:
 	mkdir -p $(BUILD_DIR)
 	mkdir -p $(foreach example,$(EXAMPLES),$(BUILD_DIR)/$(example))
+	mkdir -p $(TEST_BUILD_DIR)
 
 # Shared memory implementation
 $(SHM_OBJ): $(SHM_SRC)
@@ -59,6 +65,17 @@ simd_processing:
 	$(CC) $(SIMD_CFLAGS) $(EXAMPLES_DIR)/$@/producer.c -o $(BUILD_DIR)/$@/producer $(SIMD_LIBS) $(SIMD_INCLUDE) -I$(EXAMPLES_DIR)/$@
 	$(CC) $(SIMD_CFLAGS) $(EXAMPLES_DIR)/$@/consumer.c -o $(BUILD_DIR)/$@/consumer $(SIMD_LIBS) $(SIMD_INCLUDE) -I$(EXAMPLES_DIR)/$@
 
+# Tests for SIMD vector functions
+test_vector_functions: directories
+	$(CC) $(SIMD_CFLAGS) $(TEST_DIR)/simd_processing/test_vector_functions.c -o $(TEST_BUILD_DIR)/test_vector_functions $(SIMD_LIBS) $(SIMD_INCLUDE) -I$(EXAMPLES_DIR)/simd_processing
+
+# Run the tests
+run_tests: test_vector_functions
+	$(TEST_BUILD_DIR)/test_vector_functions
+
+# Target to build all tests
+tests: test_vector_functions
+
 # Clean targets
 clean:
 	rm -rf $(BUILD_DIR)
@@ -68,4 +85,4 @@ clean:
 clean-shm:
 	-rm /dev/shm/my_shared_memory /dev/shm/sem.sem_* /dev/shm/*_shared_memory 2>/dev/null || true
 
-.PHONY: all clean clean-shm directories $(EXAMPLES)
+.PHONY: all clean clean-shm directories $(EXAMPLES) tests run_tests test_vector_functions

@@ -35,3 +35,16 @@ jobs:
           test -f build/mmap_file/db_writer
           test -f build/simd_processing/consumer
           test -f build/simd_processing/producer
+
+      - name: Build tests
+        run: make tests
+
+      - name: Verify test binaries exist
+        run: |
+          test -f build/tests/test_vector_functions
+
+      - name: Run tests
+        run: |
+          # Run the tests - this will fail the workflow if any test fails
+          make run_tests
+          echo "All tests passed successfully!"
