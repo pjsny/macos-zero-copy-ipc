@@ -35,6 +35,10 @@ A persistent shared memory example using memory-mapped files (mmap) with regular
 
 A high-performance example optimized for Apple Silicon (M-series) processors. Uses SIMD vector instructions (ARM NEON) to process data in parallel, huge pages for better TLB efficiency, and cache-line alignment to prevent false sharing. Demonstrates how to achieve maximum performance on modern hardware.
 
+### 6. SIMD vs Standard Processing Benchmark
+
+A benchmark comparing standard buffer processing against SIMD-accelerated processing.
+
 ## Cloning the Repository
 
 This repository uses Git submodules for external dependencies. To clone the repository with all submodules:
@@ -60,6 +64,7 @@ make buffer_transfer
 make ring_buffer
 make mmap_file
 make simd_processing
+make benchmark_simd
 ```
 
 ## Credits

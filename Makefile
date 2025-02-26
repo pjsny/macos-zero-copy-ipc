@@ -22,7 +22,7 @@ SHM_INCLUDE = -I$(SRC_DIR)
 STD_EXAMPLES = countdown:process1:process2 buffer_transfer:producer:consumer ring_buffer:producer:consumer
 
 # Special examples
-SPECIAL_EXAMPLES = mmap_file simd_processing
+SPECIAL_EXAMPLES = mmap_file simd_processing benchmark_simd_buffer
 
 # All examples - extract example names from STD_EXAMPLES
 STD_EXAMPLE_NAMES = $(foreach ex,$(STD_EXAMPLES),$(firstword $(subst :, ,$(ex))))
@@ -65,6 +65,11 @@ simd_processing:
 	$(CC) $(SIMD_CFLAGS) $(EXAMPLES_DIR)/$@/producer.c -o $(BUILD_DIR)/$@/producer $(SIMD_LIBS) $(SIMD_INCLUDE) -I$(EXAMPLES_DIR)/$@
 	$(CC) $(SIMD_CFLAGS) $(EXAMPLES_DIR)/$@/consumer.c -o $(BUILD_DIR)/$@/consumer $(SIMD_LIBS) $(SIMD_INCLUDE) -I$(EXAMPLES_DIR)/$@
 
+# Special case for benchmark_simd_buffer
+benchmark_simd_buffer: $(SHM_OBJ) directories
+	mkdir -p $(BUILD_DIR)/$@
+	$(CC) $(SIMD_CFLAGS) $(EXAMPLES_DIR)/$@/benchmark.c $(SHM_OBJ) -o $(BUILD_DIR)/$@/benchmark $(SIMD_LIBS) $(SHM_INCLUDE) $(SIMD_INCLUDE) -I$(EXAMPLES_DIR)/buffer_transfer -I$(EXAMPLES_DIR)/simd_processing -pthread
+
 # Tests for SIMD vector functions
 test_vector_functions: directories
 	$(CC) $(SIMD_CFLAGS) $(TEST_DIR)/simd_processing/test_vector_functions.c -o $(TEST_BUILD_DIR)/test_vector_functions $(SIMD_LIBS) $(SIMD_INCLUDE) -I$(EXAMPLES_DIR)/simd_processing
@@ -72,6 +77,10 @@ test_vector_functions: directories
 # Run the tests
 run_tests: test_vector_functions
 	$(TEST_BUILD_DIR)/test_vector_functions
+
+# Run the benchmark
+run_benchmark: benchmark_simd_buffer
+	$(BUILD_DIR)/benchmark_simd_buffer/benchmark
 
 # Target to build all tests
 tests: test_vector_functions
@@ -85,4 +94,4 @@ clean:
 clean-shm:
 	-rm /dev/shm/my_shared_memory /dev/shm/sem.sem_* /dev/shm/*_shared_memory 2>/dev/null || true
 
-.PHONY: all clean clean-shm directories $(EXAMPLES) tests run_tests test_vector_functions
+.PHONY: all clean clean-shm directories $(EXAMPLES) tests run_tests test_vector_functions benchmark_simd_buffer run_benchmark
