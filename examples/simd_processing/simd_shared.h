@@ -7,6 +7,7 @@
 #include <arm_neon.h>
 #include <arm_sve.h>
 #include <math.h>
+#include "../../external/math_intrinsics/math_intrinsics.h"
 
 // Use 2MB huge pages for better TLB efficiency
 #define HUGE_PAGE_SIZE (2 * 1024 * 1024)
@@ -69,54 +70,7 @@ static inline bool buffer_is_full(simd_shared_t *shm, uint32_t capacity)
     return buffer_size(shm) >= capacity;
 }
 
-// Custom implementation of vector exp since vexpq_f32 isn't available
-static inline float32x4_t custom_vexpq_f32(float32x4_t x)
-{
-    // Extract the 4 float values
-    float values[4];
-    vst1q_f32(values, x);
-
-    // Apply exp to each value
-    for (int i = 0; i < 4; i++)
-    {
-        values[i] = expf(values[i]);
-    }
-
-    // Load back into a vector
-    return vld1q_f32(values);
-}
-
-// SIMD helper functions
-// Exponential polynomial coefficients
-static const float exp_tab[] = {1.0f, 1.0f, 0.5f, 0.166666667f, 0.041666667f, 0.008333333f};
-
-static inline float32x4_t vexpq_f32(
-    float32x4_t x)
-{
-    // Perform range reduction [-log(2),log(2)]
-    int32x4_t m = vcvtq_s32_f32(vmulq_n_f32(x, 1.4426950408f));
-    float32x4_t val = vfmsq_f32(x, vcvtq_f32_s32(m), vdupq_n_f32(0.6931471805f));
-
-    // Polynomial Approximation
-    // Replace with custom implementation since vtaylor_polyq_f32 isn't available
-    float32x4_t z = val;
-    float32x4_t result = vdupq_n_f32(exp_tab[0]);
-
-    for (int i = 1; i < 6; i++)
-    {
-        result = vaddq_f32(result, vmulq_n_f32(z, exp_tab[i]));
-        z = vmulq_f32(z, val);
-    }
-
-    // Reconstruct
-    int32x4_t shifted = vqshlq_n_s32(m, 23);
-    result = vmulq_f32(result, vreinterpretq_f32_s32(vaddq_s32(shifted, vdupq_n_s32(127 << 23))));
-
-    // Handle underflow
-    uint32x4_t mask = vcltq_s32(m, vdupq_n_s32(-126));
-    return vbslq_f32(mask, vdupq_n_f32(0.0f), result);
-}
-
+// SIMD helper functions using math intrinsics library
 static inline float32x4_t vector_sigmoid(float32x4_t x)
 {
     // Vectorized sigmoid approximation: 1/(1+exp(-x))

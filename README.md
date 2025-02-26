@@ -35,6 +35,19 @@ A persistent shared memory example using memory-mapped files (mmap) with regular
 
 A high-performance example optimized for Apple Silicon (M-series) processors. Uses SIMD vector instructions (ARM NEON) to process data in parallel, huge pages for better TLB efficiency, and cache-line alignment to prevent false sharing. Demonstrates how to achieve maximum performance on modern hardware.
 
+## Cloning the Repository
+
+This repository uses Git submodules for external dependencies. To clone the repository with all submodules:
+
+```bash
+# Clone the repository with submodules
+git clone --recursive https://github.com/pjsny/macos-zero-copy-ipc.git
+
+# Or if you already cloned without --recursive:
+git submodule init
+git submodule update
+```
+
 ## Building
 
 ```bash
@@ -48,3 +61,7 @@ make ring_buffer
 make mmap_file
 make simd_processing
 ```
+
+## Credits
+
+The SIMD-Accelerated Processing example uses the [math_intrinsics](https://github.com/Geolm/math_intrinsics) library by Geolm for efficient SIMD math operations. This excellent library provides transcendental math functions (cos, sin, acos, etc.) implemented using 100% AVX/Neon instructions with no branching.
