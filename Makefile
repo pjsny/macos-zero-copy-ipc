@@ -14,7 +14,7 @@ SHM_OBJ = $(BUILD_DIR)/shared_memory.o
 SHM_INCLUDE = -I$(SRC_DIR)
 
 # Examples
-EXAMPLES = countdown buffer_transfer
+EXAMPLES = countdown buffer_transfer ring_buffer
 
 # Default target
 all: directories $(EXAMPLES)
@@ -38,6 +38,11 @@ buffer_transfer: $(SHM_OBJ) $(EXAMPLES_DIR)/buffer_transfer/consumer.c $(EXAMPLE
 	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/buffer_transfer/consumer.c $(SHM_OBJ) -o $(BUILD_DIR)/buffer_transfer/consumer $(LIBS) $(SHM_INCLUDE) -I$(EXAMPLES_DIR)/buffer_transfer
 	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/buffer_transfer/producer.c $(SHM_OBJ) -o $(BUILD_DIR)/buffer_transfer/producer $(LIBS) $(SHM_INCLUDE) -I$(EXAMPLES_DIR)/buffer_transfer
 
+# Ring buffer example
+ring_buffer: $(SHM_OBJ) $(EXAMPLES_DIR)/ring_buffer/consumer.c $(EXAMPLES_DIR)/ring_buffer/producer.c $(EXAMPLES_DIR)/ring_buffer/ring_buffer_shared.h
+	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/ring_buffer/consumer.c $(SHM_OBJ) -o $(BUILD_DIR)/ring_buffer/consumer $(LIBS) $(SHM_INCLUDE) -I$(EXAMPLES_DIR)/ring_buffer
+	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/ring_buffer/producer.c $(SHM_OBJ) -o $(BUILD_DIR)/ring_buffer/producer $(LIBS) $(SHM_INCLUDE) -I$(EXAMPLES_DIR)/ring_buffer
+
 # Clean build files
 clean:
 	rm -rf $(BUILD_DIR)
@@ -48,5 +53,6 @@ clean-shm:
 	-rm /dev/shm/my_shared_memory 2>/dev/null || true
 	-rm /dev/shm/sem.sem_ready 2>/dev/null || true
 	-rm /dev/shm/sem.sem_done 2>/dev/null || true
+	-rm /dev/shm/ring_buffer_shared_memory 2>/dev/null || true
 
 .PHONY: all clean clean-shm directories $(EXAMPLES) run-countdown-1 run-countdown-2 run-buffer-consumer run-buffer-producer

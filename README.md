@@ -16,6 +16,10 @@ A simple demonstration where one process counts down from 10 to 0, sending each 
 
 An example of continuous data streaming between processes. One process generates random X,Y coordinates and the other displays them in real-time.
 
+### 3. Lock-Free Ring Buffer
+
+A high-performance lock-free ring buffer implementation using atomic operations for thread-safe communication without mutexes. Demonstrates efficient producer-consumer pattern with non-blocking I/O.
+
 ## Building
 
 ```bash
@@ -25,4 +29,5 @@ make
 # Build a specific example
 make countdown
 make buffer_transfer
+make ring_buffer
 ```
