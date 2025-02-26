@@ -50,11 +50,19 @@ make clean-shm
 ## How It Works
 
 1. `process1` creates a shared memory region and waits for `process2` to connect
-2. `process2` connects to the shared memory and signals it's ready
-3. `process1` writes data to the shared memory and signals it's done
-4. `process2` reads the data directly from the shared memory (zero-copy)
-5. Both processes clean up resources
+2. `process2` connects to the shared memory and begins a countdown from 10 to 0
+3. For each number in the countdown, `process2` writes it to shared memory
+4. `process1` reads each number, processes it (multiplies by 2), and waits for the next one
+5. When `process1` receives 0, it completes processing and cleans up
+6. Both processes eventually clean up their resources
 
-## License
+## Demo Timeline
 
-[MIT License](LICENSE)
+When you run the demo, expect the following sequence:
+
+1. Start `process1` - it will wait for a connection
+2. Start `process2` - it connects to the shared memory
+3. `process2` begins counting down from 10 to 0, sending each number to `process1`
+4. `process1` reads each number, processes it, and outputs the result
+5. After `process2` sends 0, it completes and cleans up
+6. When `process1` receives 0, it also completes and cleans up

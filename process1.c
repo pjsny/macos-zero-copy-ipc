@@ -31,19 +31,31 @@ int main()
     // Wait for reader to connect
     sem_wait(sem_ready);
 
-    // Write data to shared memory
-    const char *message = "Hello from process1 - this is zero-copy shared memory!";
-    strcpy(shm.addr, message);
+    printf("Connection established, processing numbers...\n");
 
-    printf("Data written to shared memory: %s\n", (char *)shm.addr);
+    // Process numbers until we get a zero
+    int number = -1;
+    while (1)
+    {
+        // Wait for the signal that a new number is available
+        sem_wait(sem_done);
 
-    // Signal that data is ready
-    sem_post(sem_done);
+        // Read and parse the number
+        sscanf(shm.addr, "%d", &number);
+        printf("Received number: %d\n", number);
 
-    // Wait for a moment to ensure reader has time to read
-    sleep(1);
+        if (number == 0)
+        {
+            printf("Received 0, processing complete\n");
+            break;
+        }
+
+        // Signal that we're ready for the next number
+        sem_post(sem_ready);
+    }
 
     // Clean up
+    printf("Cleaning up resources\n");
     shared_memory_destroy(&shm, 1);
     sem_close(sem_ready);
     sem_close(sem_done);

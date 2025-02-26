@@ -24,18 +24,37 @@ int main()
         return 1;
     }
 
-    printf("Connected to shared memory, signaling writer...\n");
+    printf("Connected to shared memory\n");
 
-    // Signal that reader is ready
+    // Signal initial connection
     sem_post(sem_ready);
 
-    // Wait for data to be ready
-    sem_wait(sem_done);
+    // Countdown from 10 to 0, sending each number to process1
+    printf("Starting countdown from 10 to 0:\n");
+    for (int i = 10; i >= 0; i--)
+    {
+        printf("  Sending %d...\n", i);
 
-    // Read data from shared memory
-    printf("Read from shared memory: %s\n", (char *)shm.addr);
+        // Write the number to shared memory
+        sprintf(shm.addr, "%d", i);
 
-    // Clean up
+        // Signal that a new number is available
+        sem_post(sem_done);
+
+        if (i > 0)
+        {
+            // Wait for process1 to process the number
+            sem_wait(sem_ready);
+            sleep(1);
+        }
+        else
+        {
+            // Don't wait after sending 0, as process1 will exit
+            printf("Sent 0, process1 should exit\n");
+        }
+    }
+
+    // Clean up our resources
     shared_memory_destroy(&shm, 0); // Don't unlink, let process1 do it
     sem_close(sem_ready);
     sem_close(sem_done);
