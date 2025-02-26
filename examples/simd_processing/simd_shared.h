@@ -7,7 +7,7 @@
 #include <arm_neon.h>
 #include <arm_sve.h>
 #include <math.h>
-#include "../../external/math_intrinsics/math_intrinsics.h"
+#include "math_intrinsics.h"
 
 // Use 2MB huge pages for better TLB efficiency
 #define HUGE_PAGE_SIZE (2 * 1024 * 1024)

@@ -80,7 +80,6 @@ int main()
             counter++;
             total_bytes += bytes_read;
 
-            // Print stats
             printf("\rConsumed %u packets, %llu total bytes", counter, total_bytes);
             fflush(stdout);
 

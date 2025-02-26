@@ -8,23 +8,17 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest-arm64
+    runs-on: macos-14
 
     steps:
       - uses: actions/checkout@v3
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y clang
+          brew install llvm
 
       - name: Build project
         run: make all
-
-      - name: Run tests
-        run: |
-          # Add test commands here if you have any
-          # Example: make test
 
       - name: Verify binaries exist
         run: |
@@ -32,3 +26,10 @@ jobs:
           test -f build/countdown/process2
           test -f build/buffer_transfer/consumer
           test -f build/buffer_transfer/producer
+          test -f build/ring_buffer/consumer
+          test -f build/ring_buffer/producer
+          test -f build/mmap_file/db_creator
+          test -f build/mmap_file/db_reader
+          test -f build/mmap_file/db_writer
+          test -f build/simd_processing/consumer
+          test -f build/simd_processing/producer
