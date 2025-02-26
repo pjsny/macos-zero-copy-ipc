@@ -4,44 +4,44 @@ CC = clang
 CFLAGS = -Wall -Wextra -g
 LIBS = 
 
-# Object files
-OBJ = shared_memory.o
+SRC_DIR = src
+EXAMPLES_DIR = examples
+BUILD_DIR = build
 
-# Executables
-BINS = process1 process2
+# Shared Memory Library
+SHM_SRC = $(SRC_DIR)/shared_memory.c
+SHM_OBJ = $(BUILD_DIR)/shared_memory.o
+SHM_INCLUDE = -I$(SRC_DIR)
+
+# Examples
+EXAMPLES = countdown
 
 # Default target
-all: $(BINS)
+all: directories $(EXAMPLES)
+
+# Create build directories
+directories:
+	mkdir -p $(BUILD_DIR)
+	mkdir -p $(foreach example,$(EXAMPLES),$(BUILD_DIR)/$(example))
 
 # Shared memory implementation
-shared_memory.o: shared_memory.c shared_memory.h
-	$(CC) $(CFLAGS) -c $< -o $@
+$(SHM_OBJ): $(SHM_SRC)
+	$(CC) $(CFLAGS) -c $< -o $@ $(SHM_INCLUDE)
 
-# Process 1 (writer)
-process1: process1.c $(OBJ)
-	$(CC) $(CFLAGS) $< $(OBJ) -o $@ $(LIBS)
-
-# Process 2 (reader)
-process2: process2.c $(OBJ)
-	$(CC) $(CFLAGS) $< $(OBJ) -o $@ $(LIBS)
+# Countdown example
+countdown: $(SHM_OBJ) $(EXAMPLES_DIR)/countdown/process1.c $(EXAMPLES_DIR)/countdown/process2.c
+	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/countdown/process1.c $(SHM_OBJ) -o $(BUILD_DIR)/countdown/process1 $(LIBS) $(SHM_INCLUDE)
+	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/countdown/process2.c $(SHM_OBJ) -o $(BUILD_DIR)/countdown/process2 $(LIBS) $(SHM_INCLUDE)
 
 # Clean build files
 clean:
-	rm -f $(OBJ) $(BINS)
+	rm -rf $(BUILD_DIR)
 	rm -f /tmp/xpc_connection_name
 
-# Clean shared memory objects (in case they weren't properly cleaned up)
+# Clean shared memory objects
 clean-shm:
 	-rm /dev/shm/my_shared_memory 2>/dev/null || true
 	-rm /dev/shm/sem.sem_ready 2>/dev/null || true
 	-rm /dev/shm/sem.sem_done 2>/dev/null || true
 
-# Run process1
-run1:
-	./process1
-
-# Run process2
-run2:
-	./process2
-
-.PHONY: all clean clean-shm run1 run2
+.PHONY: all clean clean-shm directories $(EXAMPLES) run-countdown-1 run-countdown-2

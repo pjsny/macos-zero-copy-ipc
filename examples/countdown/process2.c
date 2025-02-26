@@ -1,9 +1,8 @@
-// process2.c
 #include "shared_memory.h"
 
 int main()
 {
-    printf("Starting shared memory reader (process2)\n");
+    printf("Starting shared memory writer (process2)\n");
 
     // Open semaphores
     sem_t *sem_ready = sem_open(SEM_READY_NAME, 0);
@@ -59,7 +58,7 @@ int main()
     sem_close(sem_ready);
     sem_close(sem_done);
 
-    printf("Reader process completed\n");
+    printf("Writer process completed\n");
 
     return 0;
 }

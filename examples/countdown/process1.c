@@ -1,9 +1,8 @@
-// process1.c
 #include "shared_memory.h"
 
 int main()
 {
-    printf("Starting shared memory writer (process1)\n");
+    printf("Starting shared memory reader (process1)\n");
 
     // Create semaphores
     sem_unlink(SEM_READY_NAME);
@@ -26,9 +25,9 @@ int main()
         return 1;
     }
 
-    printf("Shared memory created, waiting for reader...\n");
+    printf("Shared memory created, waiting for writer...\n");
 
-    // Wait for reader to connect
+    // Wait for writer to connect
     sem_wait(sem_ready);
 
     printf("Connection established, processing numbers...\n");
@@ -62,7 +61,7 @@ int main()
     sem_unlink(SEM_READY_NAME);
     sem_unlink(SEM_DONE_NAME);
 
-    printf("Writer process completed\n");
+    printf("Reader process completed\n");
 
     return 0;
 }
