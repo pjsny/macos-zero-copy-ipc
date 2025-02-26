@@ -1,4 +1,3 @@
-// shared_memory.h
 #ifndef SHARED_MEMORY_H
 #define SHARED_MEMORY_H
 

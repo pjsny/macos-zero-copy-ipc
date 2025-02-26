@@ -1,0 +1,34 @@
+name: Build Project
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang
+
+      - name: Build project
+        run: make all
+
+      - name: Run tests
+        run: |
+          # Add test commands here if you have any
+          # Example: make test
+
+      - name: Verify binaries exist
+        run: |
+          test -f build/countdown/process1
+          test -f build/countdown/process2
+          test -f build/buffer_transfer/consumer
+          test -f build/buffer_transfer/producer

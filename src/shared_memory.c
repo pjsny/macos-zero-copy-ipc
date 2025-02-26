@@ -1,4 +1,3 @@
-// shared_memory.c
 #include "shared_memory.h"
 
 int shared_memory_create(shared_memory_t *shm, const char *name, size_t size)
