@@ -1,0 +1,16 @@
+# Compiled binaries
+process1
+process2
+
+# Object files
+*.o
+
+# macOS specific
+.DS_Store
+
+# Editor files
+.vscode/
+.idea/
+
+# Debug symbol files
+*.dSYM/
