@@ -1,0 +1,3 @@
+[submodule "external/math_intrinsics"]
+	path = external/math_intrinsics
+	url = https://github.com/Geolm/math_intrinsics.git
