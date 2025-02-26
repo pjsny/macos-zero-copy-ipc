@@ -14,7 +14,7 @@ SHM_OBJ = $(BUILD_DIR)/shared_memory.o
 SHM_INCLUDE = -I$(SRC_DIR)
 
 # Examples
-EXAMPLES = countdown
+EXAMPLES = countdown buffer_transfer
 
 # Default target
 all: directories $(EXAMPLES)
@@ -33,6 +33,11 @@ countdown: $(SHM_OBJ) $(EXAMPLES_DIR)/countdown/process1.c $(EXAMPLES_DIR)/count
 	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/countdown/process1.c $(SHM_OBJ) -o $(BUILD_DIR)/countdown/process1 $(LIBS) $(SHM_INCLUDE)
 	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/countdown/process2.c $(SHM_OBJ) -o $(BUILD_DIR)/countdown/process2 $(LIBS) $(SHM_INCLUDE)
 
+# Buffer transfer example
+buffer_transfer: $(SHM_OBJ) $(EXAMPLES_DIR)/buffer_transfer/consumer.c $(EXAMPLES_DIR)/buffer_transfer/producer.c $(EXAMPLES_DIR)/buffer_transfer/buffer_shared.h
+	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/buffer_transfer/consumer.c $(SHM_OBJ) -o $(BUILD_DIR)/buffer_transfer/consumer $(LIBS) $(SHM_INCLUDE) -I$(EXAMPLES_DIR)/buffer_transfer
+	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/buffer_transfer/producer.c $(SHM_OBJ) -o $(BUILD_DIR)/buffer_transfer/producer $(LIBS) $(SHM_INCLUDE) -I$(EXAMPLES_DIR)/buffer_transfer
+
 # Clean build files
 clean:
 	rm -rf $(BUILD_DIR)
@@ -44,4 +49,4 @@ clean-shm:
 	-rm /dev/shm/sem.sem_ready 2>/dev/null || true
 	-rm /dev/shm/sem.sem_done 2>/dev/null || true
 
-.PHONY: all clean clean-shm directories $(EXAMPLES) run-countdown-1 run-countdown-2
+.PHONY: all clean clean-shm directories $(EXAMPLES) run-countdown-1 run-countdown-2 run-buffer-consumer run-buffer-producer

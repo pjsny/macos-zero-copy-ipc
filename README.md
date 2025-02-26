@@ -12,6 +12,10 @@ This repository contains examples of inter-process communication using zero-copy
 
 A simple demonstration where one process counts down from 10 to 0, sending each number to another process that processes it.
 
+### 2. Buffer Transfer
+
+An example of continuous data streaming between processes. One process generates random X,Y coordinates and the other displays them in real-time.
+
 ## Building
 
 ```bash
@@ -20,4 +24,5 @@ make
 
 # Build a specific example
 make countdown
+make buffer_transfer
 ```
