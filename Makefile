@@ -13,7 +13,7 @@ SHM_SRC = $(SRC_DIR)/shared_memory.c
 SHM_OBJ = $(BUILD_DIR)/shared_memory.o
 SHM_INCLUDE = -I$(SRC_DIR)
 
-# Examples
+# List of examples - add new examples here
 EXAMPLES = countdown buffer_transfer ring_buffer
 
 # Default target
@@ -28,20 +28,23 @@ directories:
 $(SHM_OBJ): $(SHM_SRC)
 	$(CC) $(CFLAGS) -c $< -o $@ $(SHM_INCLUDE)
 
-# Countdown example
-countdown: $(SHM_OBJ) $(EXAMPLES_DIR)/countdown/process1.c $(EXAMPLES_DIR)/countdown/process2.c
-	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/countdown/process1.c $(SHM_OBJ) -o $(BUILD_DIR)/countdown/process1 $(LIBS) $(SHM_INCLUDE)
-	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/countdown/process2.c $(SHM_OBJ) -o $(BUILD_DIR)/countdown/process2 $(LIBS) $(SHM_INCLUDE)
+# Generic rule for examples with two executables
+# The first parameter is the example name
+# The second parameter is the first executable name (default: process1)
+# The third parameter is the second executable name (default: process2)
+define build_example_pair
+$(1): $(SHM_OBJ) $(wildcard $(EXAMPLES_DIR)/$(1)/*.h) $(EXAMPLES_DIR)/$(1)/$(2).c $(EXAMPLES_DIR)/$(1)/$(3).c
+	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/$(1)/$(2).c $(SHM_OBJ) -o $(BUILD_DIR)/$(1)/$(2) $(LIBS) $(SHM_INCLUDE) -I$(EXAMPLES_DIR)/$(1)
+	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/$(1)/$(3).c $(SHM_OBJ) -o $(BUILD_DIR)/$(1)/$(3) $(LIBS) $(SHM_INCLUDE) -I$(EXAMPLES_DIR)/$(1)
+endef
 
-# Buffer transfer example
-buffer_transfer: $(SHM_OBJ) $(EXAMPLES_DIR)/buffer_transfer/consumer.c $(EXAMPLES_DIR)/buffer_transfer/producer.c $(EXAMPLES_DIR)/buffer_transfer/buffer_shared.h
-	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/buffer_transfer/consumer.c $(SHM_OBJ) -o $(BUILD_DIR)/buffer_transfer/consumer $(LIBS) $(SHM_INCLUDE) -I$(EXAMPLES_DIR)/buffer_transfer
-	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/buffer_transfer/producer.c $(SHM_OBJ) -o $(BUILD_DIR)/buffer_transfer/producer $(LIBS) $(SHM_INCLUDE) -I$(EXAMPLES_DIR)/buffer_transfer
+# Apply the template for each example
+$(eval $(call build_example_pair,countdown,process1,process2))
+$(eval $(call build_example_pair,buffer_transfer,producer,consumer))
+$(eval $(call build_example_pair,ring_buffer,producer,consumer))
 
-# Ring buffer example
-ring_buffer: $(SHM_OBJ) $(EXAMPLES_DIR)/ring_buffer/consumer.c $(EXAMPLES_DIR)/ring_buffer/producer.c $(EXAMPLES_DIR)/ring_buffer/ring_buffer_shared.h
-	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/ring_buffer/consumer.c $(SHM_OBJ) -o $(BUILD_DIR)/ring_buffer/consumer $(LIBS) $(SHM_INCLUDE) -I$(EXAMPLES_DIR)/ring_buffer
-	$(CC) $(CFLAGS) $(EXAMPLES_DIR)/ring_buffer/producer.c $(SHM_OBJ) -o $(BUILD_DIR)/ring_buffer/producer $(LIBS) $(SHM_INCLUDE) -I$(EXAMPLES_DIR)/ring_buffer
+# To add a new example, just add its name to the EXAMPLES list and call the template:
+# $(eval $(call build_example_pair,new_example_name,executable1_name,executable2_name))
 
 # Clean build files
 clean:
@@ -55,4 +58,4 @@ clean-shm:
 	-rm /dev/shm/sem.sem_done 2>/dev/null || true
 	-rm /dev/shm/ring_buffer_shared_memory 2>/dev/null || true
 
-.PHONY: all clean clean-shm directories $(EXAMPLES) run-countdown-1 run-countdown-2 run-buffer-consumer run-buffer-producer
+.PHONY: all clean clean-shm directories $(EXAMPLES)
