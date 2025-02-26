@@ -4,6 +4,7 @@ LIBS =
 
 # Add optimization flags for SIMD example
 SIMD_CFLAGS = $(CFLAGS) -O3 -march=armv8-a -D__MATH__INTRINSICS__IMPLEMENTATION__
+
 SIMD_LIBS = -lm  # Math library for expf function
 SIMD_INCLUDE = -I$(CURDIR)/external/math_intrinsics
 
