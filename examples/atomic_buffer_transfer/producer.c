@@ -1,12 +1,33 @@
 #include "shared_memory.h"
 #include "atomic_buffer_shared.h"
 #include <time.h>
-#include <math.h>
+#include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+// Function to generate a random string of variable length
+void generate_random_string(char *buffer, int max_length)
+{
+    static const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:,.<>?";
+    int charset_size = sizeof(charset) - 1;
+
+    // Generate a random length between 5 and max_length-1
+    int length = 5 + rand() % (max_length - 5);
+
+    // Generate random characters
+    for (int i = 0; i < length; i++)
+    {
+        buffer[i] = charset[rand() % charset_size];
+    }
+
+    // Null-terminate the string
+    buffer[length] = '\0';
+}
 
 int main()
 {
-    printf("Starting atomic producer (generates 4 float values)\n");
+    printf("Starting atomic producer (generates random variable-length strings)\n");
     fflush(stdout);
 
     // Seed random number generator
@@ -24,58 +45,50 @@ int main()
     fflush(stdout);
 
     // Initialize the data structure in shared memory
-    atomic_point_data_t *point_data = (atomic_point_data_t *)shm.addr;
+    atomic_string_data_t *string_data = (atomic_string_data_t *)shm.addr;
 
-    // Initialize values
-    for (int i = 0; i < 4; i++)
-    {
-        point_data->values[i] = 0.0f;
-    }
+    // Initialize string to empty
+    string_data->string_data[0] = '\0';
 
     // Initialize version counter to 0
-    atomic_store(&point_data->version, 0);
+    atomic_store(&string_data->version, 0);
 
     printf("Shared memory initialized, ready to generate data\n");
     printf("Press Ctrl+C to exit\n");
     fflush(stdout);
 
-    // Animation parameters
-    float time = 0.0f;
-    const float dt = 0.033f; // ~30 FPS time step
     unsigned int update_count = 0;
 
-    // Continuously generate values
+    // Continuously generate strings
     while (1)
     {
-        // Generate some interesting animated values (sine waves with different frequencies)
-        point_data->values[0] = sinf(time) * 50.0f + 50.0f;         // 0-100 range
-        point_data->values[1] = sinf(time * 1.3f) * 50.0f + 50.0f;  // 0-100 range
-        point_data->values[2] = sinf(time * 0.7f) * 50.0f + 50.0f;  // 0-100 range
-        point_data->values[3] = (sinf(time * 2.0f) + 1.0f) * 50.0f; // 0-100 range
+        // Generate a random variable-length string
+        char temp_buffer[MAX_STRING_LENGTH];
+        generate_random_string(temp_buffer, 32);
+
+        // Copy the string to shared memory
+        strcpy(string_data->string_data, temp_buffer);
 
         // Memory barrier to ensure all writes are visible before updating version
         atomic_thread_fence(memory_order_release);
 
         // Update version counter atomically
-        atomic_fetch_add(&point_data->version, 1);
+        atomic_fetch_add(&string_data->version, 1);
 
         update_count++;
 
-        // Print status every 30 updates (approximately once per second)
-        if (update_count % 30 == 0)
+        // Print status every 10 updates
+        if (update_count % 10 == 0)
         {
-            printf("Generated values: [%.2f, %.2f, %.2f, %.2f] (update #%u)\n",
-                   point_data->values[0], point_data->values[1],
-                   point_data->values[2], point_data->values[3],
+            printf("Generated string (length %zu): \"%s\" (update #%u)\n",
+                   strlen(string_data->string_data),
+                   string_data->string_data,
                    update_count);
             fflush(stdout);
         }
 
-        // Sleep to control update rate (~30 FPS)
-        usleep(33333); // 33.333ms = ~30 FPS
-
-        // Update time
-        time += dt;
+        // Sleep to control update rate (~3 updates per second)
+        usleep(333333); // 333.333ms = ~3 updates/sec
     }
 
     // This code will never be reached unless interrupted

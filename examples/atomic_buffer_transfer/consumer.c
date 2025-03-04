@@ -2,10 +2,12 @@
 #include "atomic_buffer_shared.h"
 #include <unistd.h>
 #include <time.h>
+#include <stdio.h>
+#include <string.h>
 
 int main()
 {
-    printf("Starting atomic consumer (visualizer for 4 float values)\n");
+    printf("Starting atomic consumer (visualizer for variable-length strings)\n");
     fflush(stdout);
 
     // Open shared memory
@@ -20,7 +22,7 @@ int main()
     fflush(stdout);
 
     // Access the data structure in shared memory
-    atomic_point_data_t *point_data = (atomic_point_data_t *)shm.addr;
+    atomic_string_data_t *string_data = (atomic_string_data_t *)shm.addr;
 
     // Keep track of the last version we processed
     unsigned int last_version = 0;
@@ -33,36 +35,50 @@ int main()
 
     printf("Connected to shared memory, ready to visualize data\n");
     printf("Press Ctrl+C to exit\n");
-    printf("---------------------------------------------------------\n");
-    printf("| Frame # | Updates | FPS |   Value1   Value2   Value3   Value4  |\n");
-    printf("---------------------------------------------------------\n");
+    printf("--------------------------------------------------------------\n");
+    printf("| Frame # | Updates | FPS | String Length | String Content   |\n");
+    printf("--------------------------------------------------------------\n");
     fflush(stdout);
 
     // Visualization loop
     while (1)
     {
         // Check if there's a new version available (non-blocking)
-        unsigned int current_version = atomic_load(&point_data->version);
+        unsigned int current_version = atomic_load(&string_data->version);
 
         if (current_version != last_version)
         {
             // Memory barrier to ensure we read fresh values
             atomic_thread_fence(memory_order_acquire);
 
-            // Read the values
-            float v1 = point_data->values[0];
-            float v2 = point_data->values[1];
-            float v3 = point_data->values[2];
-            float v4 = point_data->values[3];
+            // Read the string
+            char string_copy[MAX_STRING_LENGTH];
+            strcpy(string_copy, string_data->string_data);
+            size_t string_length = strlen(string_copy);
 
             // Update our last processed version
             last_version = current_version;
             updates_received++;
 
-            // Visualize the data (here we just print it, but in a real app you'd render it)
-            printf("| %7u | %7u | %3d | %7.2f  %7.2f  %7.2f  %7.2f |\n",
+            // Display the string (truncate if too long for display)
+            char display_string[41]; // 40 chars + null terminator
+            if (string_length > 40)
+            {
+                strncpy(display_string, string_copy, 37);
+                display_string[37] = '.';
+                display_string[38] = '.';
+                display_string[39] = '.';
+                display_string[40] = '\0';
+            }
+            else
+            {
+                strcpy(display_string, string_copy);
+            }
+
+            // Visualize the data
+            printf("| %7u | %7u | %3d | %13zu | %-16s |\n",
                    frames_processed, updates_received, fps,
-                   v1, v2, v3, v4);
+                   string_length, display_string);
             fflush(stdout);
         }
 
