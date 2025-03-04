@@ -15,6 +15,8 @@ Each approach has different performance characteristics and use cases.
 
 ## Examples
 
+_todo_ soon some of these examples will have mini-blogs writeups behind why they exist, and what I use them for
+
 ### 1. Countdown
 
 A simple demonstration where one process counts down from 10 to 0, sending each number to another process that processes it. Uses POSIX shared memory (shm_open) and semaphores for synchronization.
@@ -27,15 +29,19 @@ An example of continuous data streaming between processes. One process generates
 
 A high-performance lock-free ring buffer implementation using atomic operations for thread-safe communication without mutexes. Demonstrates efficient producer-consumer pattern with non-blocking I/O. Uses POSIX shared memory (shm_open) but replaces semaphores with atomic operations.
 
-### 4. Memory-Mapped File Database
+### 4. Atomic Buffer Transfer
+
+A lightweight visualization-oriented example that uses atomic operations instead of semaphores for synchronization. Optimized for scenarios where a producer generates data (4 float values) that a consumer visualizes at a fixed frame rate (30 FPS). Demonstrates a non-blocking, lock-free approach that allows both processes to run at their own pace without waiting for each other.
+
+### 5. Memory-Mapped File Database
 
 A persistent shared memory example using memory-mapped files (mmap) with regular files. Demonstrates how to create a simple database that persists between program executions and can be accessed by multiple processes simultaneously. Uses pthread mutexes for synchronization.
 
-### 5. SIMD-Accelerated Processing
+### 6. SIMD-Accelerated Processing
 
 A high-performance example optimized for Apple Silicon (M-series) processors. Uses SIMD vector instructions (ARM NEON) to process data in parallel, huge pages for better TLB efficiency, and cache-line alignment to prevent false sharing. Demonstrates how to achieve maximum performance on modern hardware.
 
-### 6. SIMD vs Standard Processing Benchmark
+### 7. SIMD vs Standard Processing Benchmark
 
 A benchmark comparing standard buffer processing against SIMD-accelerated processing.
 
@@ -62,6 +68,7 @@ make
 make countdown
 make buffer_transfer
 make ring_buffer
+make atomic_buffer_transfer
 make mmap_file
 make simd_processing
 make benchmark_simd

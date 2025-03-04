@@ -19,7 +19,7 @@ SHM_OBJ = $(BUILD_DIR)/shared_memory.o
 SHM_INCLUDE = -I$(SRC_DIR)
 
 # Standard examples with producer/consumer or process1/process2 pattern
-STD_EXAMPLES = countdown:process1:process2 buffer_transfer:producer:consumer ring_buffer:producer:consumer
+STD_EXAMPLES = countdown:process1:process2 buffer_transfer:producer:consumer ring_buffer:producer:consumer atomic_buffer_transfer:producer:consumer
 
 # Special examples
 SPECIAL_EXAMPLES = mmap_file simd_processing benchmark_simd_buffer
